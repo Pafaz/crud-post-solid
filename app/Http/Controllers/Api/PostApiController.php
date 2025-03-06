@@ -21,22 +21,12 @@ class PostApiController extends Controller
      */
     public function index()
     {   
-        $response = $this->postService->getPosts();
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => PostResource::collection($response['data']),
-        ], $response['statusCode']);
+        return $this->postService->getPostsApi();
     }
 
     public function show(string $id)
     {
-        $response = $this->postService->getPost($id);
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->postService->getPostApi($id);
     }
 
     /**
@@ -44,12 +34,7 @@ class PostApiController extends Controller
      */
     public function store(PostRequest $request)
     {   
-        $response = $this->postService->create($request->validated());
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->postService->createPostApi($request->validated());
     }
 
     /**
@@ -57,12 +42,7 @@ class PostApiController extends Controller
      */
     public function update(PostRequest $request, string $id)
     {
-        $response = $this->postService->update($id, $request->validated());
-        return response()->json([
-                'status' => $response['status'],
-                'message' => $response['message'],
-                'data' => $response['data'],
-            ], $response['statusCode']);
+        return $this->postService->updatePostApi($id, $request->validated());
     }
 
     /**
@@ -70,10 +50,6 @@ class PostApiController extends Controller
      */
     public function destroy( $id)
     {
-        $response = $this->postService->delete($id);
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-        ], $response['statusCode']);
+        return $this->postService->deletePostApi($id);
     }
 }

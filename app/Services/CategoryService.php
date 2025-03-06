@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Helpers\ApiResponse;
 use Illuminate\Support\Facades\Log;
 use App\Interfaces\CategoryInterface;
+use App\Http\Resources\CategoryResource;
 use Symfony\Component\HttpFoundation\Response;
 
 class CategoryService 
@@ -19,20 +21,10 @@ class CategoryService
     {
         try {
             $data = $this->categoryRepository->getAll();
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK,
-                'message' => 'Categories retrieved successfully',
-                'data' => $data,
-            ];
+            return $data;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_NOT_FOUND,
-                'message' => 'Categories Not Found',
-                'data' => [],
-            ];
+            throw $e;
         }
     }
 
@@ -40,20 +32,33 @@ class CategoryService
     {
         try {
             $data = $this->categoryRepository->create($data);
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_CREATED,
-                'message' => 'Category created successfully',
-                'data' => $data,
-            ];
+            return $data;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Something went wrong',
-                'data' => [],
-            ];
+            throw $e;
+        }
+    }
+
+    //API
+    public function getCategoriesApi()
+    {
+        try {
+            $data = $this->categoryRepository->getAll();
+            return ApiResponse::success(CategoryResource::collection($data), 'Categories retrieved successfully', Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Categories Not Found', Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function createCategoryApi(array $data)
+    {
+        try {
+            $category = $this->categoryRepository->create($data);
+            return ApiResponse::success(CategoryResource::make($category), 'Category created successfully', Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

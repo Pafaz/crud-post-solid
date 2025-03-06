@@ -19,7 +19,7 @@
         {{ session('success') }}
     </x-succes-notification>
 
-    {{-- {{dd(($post))}} --}}
+    {{-- {{dd(($tags))}} --}}
     <div class="flex justify-evenly">
         <div class="max-w-xl flex w-full flex-col border rounded-lg bg-gray-800 p-8 mt-16">
             <form action="{{ route('posts.update', $post->id) }}" method="POST">

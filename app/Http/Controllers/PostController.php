@@ -28,7 +28,7 @@ class PostController extends Controller
     public function index()
     {   
         return view('post.index', [
-            'posts' => $this->postService->getPosts(request('category'))['data'],
+            'posts' => $this->postService->getPosts(request('category')),
             'categories' => $this->categoryService->getCategories()['data'],
         ]);
     }
@@ -59,7 +59,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         return view('post.detail', [
-            'post' => $this->postService->getPost($id)['data'],
+            'post' => $this->postService->getPost($id),
         ]);
     }
 
@@ -77,6 +77,7 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, string $id)
     {
+        // dd($request->all());
         $this->postService->update($id, $request->validated());
         return redirect()->route('posts.show', $id);
     }

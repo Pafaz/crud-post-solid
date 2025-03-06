@@ -27,12 +27,7 @@ class CommentApiController extends Controller
      */
     public function store(CommentRequest $request)
     {
-        $response =  $this->commentService->create($request->all());
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->commentService->createCommentApi($request->all());
     }
 
     /**
@@ -48,12 +43,7 @@ class CommentApiController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $response = $this->commentService->update($id, $request->all());
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->commentService->updateCommentApi($id, $request->all());
     }
 
     /**
@@ -61,10 +51,6 @@ class CommentApiController extends Controller
      */
     public function destroy(string $id)
     {
-        $response = $this->commentService->delete($id);
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message']
-        ], $response['statusCode']);
+        return $this->commentService->deleteCommentApi($id);
     }
 }

@@ -19,12 +19,7 @@ class CategoryApiController extends Controller
      */
     public function index()
     {
-        $response = $this->categoryService->getCategories();
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->categoryService->getCategoriesApi();
     }
 
     /**
@@ -32,12 +27,7 @@ class CategoryApiController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        $data = $this->categoryService->create($request->validated());
-        return response()->json([
-            'message' => 'Category created successfully',
-            'data' => $data
-        ], 201
-        );
+        return $this->categoryService->createCategoryApi($request->validated());
     }
 
     /**

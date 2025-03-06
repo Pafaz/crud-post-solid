@@ -19,12 +19,7 @@ class TagApiController extends Controller
      */
     public function index()
     {
-        $response = $this->tagService->getTags();
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-        ], $response['statusCode']);
+        return $this->tagService->getTagsApi();
     }
 
     /**
@@ -32,12 +27,7 @@ class TagApiController extends Controller
      */
     public function store(TagRequest $request)
     {
-        $response = $this->tagService->createTag($request->validated());
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-            'data' => $response['data'],
-            ], $response['statusCode']);
+        return $this->tagService->createTagApi($request->validated());
     }
 
     /**
@@ -61,10 +51,6 @@ class TagApiController extends Controller
      */
     public function destroy(string $id)
     {
-        $response = $this->tagService->deleteTag($id);
-        return response()->json([
-            'status' => $response['status'],
-            'message' => $response['message'],
-        ], $response['statusCode']);
+        return $this->tagService->deleteTagApi($id);
     }
 }

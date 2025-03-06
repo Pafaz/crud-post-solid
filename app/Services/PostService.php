@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Helpers\ApiResponse;
+use App\Http\Resources\PostDetailResource;
+use App\Http\Resources\PostResource;
 use App\Interfaces\TagInterface;
 use App\Interfaces\PostInterface;
 use Illuminate\Support\Facades\Log;
@@ -29,44 +32,11 @@ class PostService
 
     public function getPosts(?string $category= null)
     {
-        try {
-            $data = $this->postRepository->getAll( $category );
-
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK,
-                'message' => 'Posts retrieved successfully',
-                'data' => $data,
-            ];
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_NOT_FOUND,
-                'message' => 'Posts Not Found',
-                'data' => [],
-            ];
-        }
+        return $this->postRepository->getAll($category);
     }
     public function getPost(int $id)
     {
-        try {
-            $post = $this->postRepository->find($id);
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK,
-                'message' => 'Post retrieved successfully',
-                'data' => $post,
-            ];
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_NOT_FOUND,
-                'message' => 'Ups! Post Not Found',
-                'data' => [],
-            ];
-        }
+        return $this->postRepository->find($id);
     }
     public function getSelectedTags(int $id): array
     {
@@ -77,10 +47,10 @@ class PostService
         $post = $this->getPost($id);
         
         return [
-            'post' => $post['data'],
+            'post' => $post,
             'selectedTags' => $post ? $this->getSelectedTags($id) : [],
-            'categories' => $this->categoryRepository->getAll()['data'],
-            'tags' => $this->tagRepository->getAll()['data']
+            'categories' => $this->categoryRepository->getAll(),
+            'tags' => $this->tagRepository->getAll()
         ];
     }
     public function create(array $data)
@@ -90,65 +60,102 @@ class PostService
             if (isset($data['tags'])) {
                 $post->tags()->attach(explode(',', $data['tags']));
             }
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_CREATED,
-                'message' => 'Post created successfully',
-                'data' => $post,
-            ];
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Post Not Created',
-                'data' => [],
-            ];
+            return $post;
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw $th;
         }
     }
     public function update(int $id, array $data)
     {
         try {
-            $post = $this->getPost($id)['data'];
-    
+            $post = $this->getPost($id);
+            
             $this->postRepository->update($id, $data);
             if (isset($data['tags'])) {
                 $post['data']->tags()->sync(explode(',', $data['tags']));
             }
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK,
-                'message' => 'Post updated successfully',
-                'data' => $post,
-            ];
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Post Not Updated',
-                'data' => [],
-            ];
+            return true;
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            throw $th;
         }
     }
     public function delete(int $id)
     {
-        try {
-            $this->commentRepository->deleteByPost($id);
-            $this->postRepository->delete($id);
+        $this->commentRepository->deleteByPost($id);
+        $this->postRepository->delete($id);
+        
+    }
 
-            return [
-                'status' => 'success',
-                'statusCode' => Response::HTTP_OK,
-                'message' => 'Post deleted successfully',
-            ];
+    //API
+    public function getPostsApi(?string $category= null)
+    {
+        try {
+            $data = $this->postRepository->getAll( $category );
+
+            return ApiResponse::success(PostResource::collection($data), 'Posts retrieved successfully', Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return [
-                'status' => 'error',
-                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Post Not Deleted',
-            ];
+            return ApiResponse::error( 'Ups! Posts Not Found', Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function getPostApi(int $id)
+    {
+        try {
+            $post = $this->postRepository->find($id);
+            return ApiResponse::success(PostDetailResource::make($post), 'Post retrieved successfully', Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Posts Not Found', Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function deletePostApi(int $id)
+    {
+        try {
+            $post = $this->postRepository->find($id);
+            if (!$post) {
+                return ApiResponse::error('Ups! Post Not Found', Response::HTTP_NOT_FOUND);
+            }
+
+            $this->postRepository->delete($id);
+            $this->commentRepository->deleteByPost($id);
+            return ApiResponse::success(null, 'Post deleted successfully', Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function createPostApi(array $data)
+    {
+        try {
+            $post = $this->postRepository->create($data);
+            return ApiResponse::success(PostResource::make($post), 'Post created successfully', Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function updatePostApi(int $id, array $data)
+    {
+        try {
+            $this->postRepository->update($id, $data);
+
+            $post = $this->getPost($id);
+            if (!$post){
+                return ApiResponse::error('Ups! Post Not Found', Response::HTTP_NOT_FOUND);
+            }
+            if (isset($data['tags'])) {
+                $post['data']->tags()->sync(explode(',', $data['tags']));
+            }
+            return ApiResponse::success(PostResource::make($post), 'Post updated successfully', Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
