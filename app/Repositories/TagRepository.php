@@ -15,7 +15,7 @@ class TagRepository implements TagInterface
 
     public function find(int $id): ?Tag
     {
-        return Tag::find($id);
+        return Tag::findOrFail($id);
     }
 
     public function create(array $data): ?Tag
@@ -30,6 +30,6 @@ class TagRepository implements TagInterface
 
     public function delete(int $id): void
     {
-        Tag::where('id', $id)->delete();
+        Tag::findOrFail($id)->delete();
     }
 }

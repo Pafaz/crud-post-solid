@@ -2,12 +2,9 @@
 
 namespace App\Services;
 
-use App\Helpers\ApiResponse;
-use App\Http\Resources\TagResource;
+use App\Helpers\Api;
 use App\Interfaces\TagInterface;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
+use App\Http\Resources\TagResource;
 use Symfony\Component\HttpFoundation\Response;
 
 class TagService {
@@ -37,38 +34,28 @@ class TagService {
     //Api
     public function getTagsApi()
     {
-        try {
-            $data = $this->tagRepository->getAll();
-            return ApiResponse::success(TagResource::collection($data), 'Tags retrieved successfully', Response::HTTP_OK);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return ApiResponse::error('Ups! Tags Not Found', Response::HTTP_NOT_FOUND);
-        }
+        $data = $this->tagRepository->getAll();
+        return Api::response(
+            TagResource::collection($data), 
+            'Tags retrieved successfully', 
+        );
     }
 
     public function createTagApi(array $data)
     {
-        try {
-            $data = $this->tagRepository->create($data);
-            return ApiResponse::success(TagResource::make($data), 'Tag created successfully', Response::HTTP_CREATED);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $data = $this->tagRepository->create($data);
+        return Api::response(
+            TagResource::make($data), 
+            'Tag created successfully', 
+            Response::HTTP_CREATED);
     }
     
     public function deleteTagApi(int $id)
     {
-        try {
-            $data = $this->tagRepository->find($id);
-            if (!$data) {
-                return ApiResponse::error('Ups! Tag Not Found', Response::HTTP_NOT_FOUND);
-            }
-            $this->tagRepository->delete($id);
-            return ApiResponse::success(null, 'Tag deleted successfully', Response::HTTP_OK);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return ApiResponse::error('Ups! Something went wrong', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $this->tagRepository->delete($id);
+        return Api::response(
+            null, 
+            'Tag deleted successfully', 
+        );
     }
 }

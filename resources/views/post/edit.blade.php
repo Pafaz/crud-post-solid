@@ -19,6 +19,17 @@
         {{ session('success') }}
     </x-succes-notification>
 
+    @if ($errors->any())
+    <div class="bg-red-500 text-white p-4 rounded-lg">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
     {{-- {{dd(($tags))}} --}}
     <div class="flex justify-evenly">
         <div class="max-w-xl flex w-full flex-col border rounded-lg bg-gray-800 p-8 mt-16">
@@ -145,6 +156,7 @@
                 <input type="text" id="categoryName" name="categoryName"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                     required>
+                    
             </div>
             <div>
                 <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
@@ -152,6 +164,7 @@
                 <textarea id="description" name="description"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                     required></textarea>
+                    
             </div>
             <div class="mt-4">
                 <button type="submit"

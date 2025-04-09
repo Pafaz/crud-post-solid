@@ -16,8 +16,8 @@ class PostController extends Controller
     public function __construct(
         PostService $postService, 
         CategoryService $categoryService, 
-        TagService $tagService)
-    {
+        TagService $tagService
+    ){
         $this->postService = $postService;
         $this->categoryService = $categoryService;
         $this->tagService = $tagService;
@@ -27,9 +27,10 @@ class PostController extends Controller
      */
     public function index()
     {   
+        // dd('abc');
         return view('post.index', [
             'posts' => $this->postService->getPosts(request('category')),
-            'categories' => $this->categoryService->getCategories()['data'],
+            'categories' => $this->categoryService->getCategories(),
         ]);
     }
 
@@ -39,8 +40,8 @@ class PostController extends Controller
     public function create()
     {
         return view('post.create', [
-            'categories' => $this->categoryService->getCategories()['data'], 
-            'tags'=> $this->tagService->getTags()['data']
+            'categories' => $this->categoryService->getCategories(), 
+            'tags'=> $this->tagService->getTags()
         ]);
     }
 

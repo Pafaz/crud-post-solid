@@ -27,6 +27,7 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request,  CategoryService $categoryService)
     {
+        // dd($request->validated());
         $categoryService->create($request->validated());
         return redirect()->back()->with('success', 'Category created successfully');
     }

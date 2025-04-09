@@ -11,7 +11,7 @@ class CommentRepository implements CommentInterface
 {
     public function find(int $id): ?Model
     {
-        return Comment::find($id);
+        return Comment::findOrFail($id);
     }
 
     public function create(array $data): ?Comment
@@ -25,7 +25,7 @@ class CommentRepository implements CommentInterface
 
     public function update(int $id, array $data): bool
     {
-        return Comment::where('id', $id)->update([
+        return Comment::findOrFail( $id)->update([
             'content' => $data['content'],
         ]);
     }

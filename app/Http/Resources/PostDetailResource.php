@@ -23,8 +23,9 @@ class PostDetailResource extends JsonResource
             'tags'      => $this->tags->pluck('name'),
             'comments'  => $this->comments->map(fn($comment) => [
                 'user'      => $comment->user->name,
-                'comment'   => $comment->body,
+                'comment'   => $comment->content,
                 'created_at'=> $comment->created_at->format('Y-m-d H:i:s'),
+                'updated_at'=> $comment->updated_at->format('Y-m-d H:i:s'),
             ]),
             'created_at'=> $this->created_at->format('Y-m-d H:i:s'),
             'updated_at'=> $this->updated_at->format('Y-m-d H:i:s'),
